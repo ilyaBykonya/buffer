@@ -13,7 +13,7 @@ namespace test_project
 
         protected override CheckDetailValidResult CheckIsValidSteeringWheel(BaseSteeringWheel newSteeringWheel)
         {
-            if (newSteeringWheel.CompabilityFlag == DetailCompability.Car)
+            if (newSteeringWheel is CarSteeringWheel)
                 return CheckDetailValidResult.Need;
 
             return CheckDetailValidResult.WrongDetail;
@@ -21,7 +21,7 @@ namespace test_project
         protected override CheckDetailValidResult CheckIsValidEnginesList(List<BaseEngine> newEngines)
         {
             if (newEngines.Count == 1)
-                if (newEngines[0].CompabilityFlag == DetailCompability.Car)
+                if (newEngines[0] is CarEngine)
                     return CheckDetailValidResult.Need;
 
             return CheckDetailValidResult.WrongDetail;

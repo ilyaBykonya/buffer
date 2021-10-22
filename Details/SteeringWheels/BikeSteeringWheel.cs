@@ -3,7 +3,7 @@
     class BikeSteeringWheel: BaseSteeringWheel
     {
         public BikeSteeringWheel(string label)
-        :base(label, DetailCompability.Bike)
+        :base(label)
         {
         }
     }

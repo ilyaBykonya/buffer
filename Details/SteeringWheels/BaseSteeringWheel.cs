@@ -2,8 +2,8 @@
 {
     class BaseSteeringWheel: BaseDetail
     {
-        protected BaseSteeringWheel(string label, DetailCompability compability)
-        :base(compability, label)
+        protected BaseSteeringWheel(string label)
+        :base(label)
         {
         }
     }

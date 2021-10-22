@@ -3,7 +3,7 @@
     class CarEngine: BaseEngine
     {
         public CarEngine(string label)
-        :base(label, DetailCompability.Car, 40)
+        :base(label, 40)
         {
         }
     }

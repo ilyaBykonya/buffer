@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace test_project
 {
-    enum CheckDetailValidResult
-    {
-        Need,
-        NotNeed,
-        WrongDetail
-    }
-
     //Класс реализует паттерн "шаблонный метод" при замене деталей
     //При этом наследники определяют валидность новой детали сами для себя
     abstract class BaseTransport
     {
+        protected enum CheckDetailValidResult
+        {
+            Need,
+            NotNeed,
+            WrongDetail
+        }
+
         //Детальки. Если транспорту нужен, к примеру, только
         //один двигатель, то в CheckIsValidEnginesList он это укажет,
         //и всё будет гуд

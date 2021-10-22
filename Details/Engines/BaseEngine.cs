@@ -4,8 +4,8 @@
     {
         public int PowerEngine { get; protected set; }
 
-        protected BaseEngine(string label, DetailCompability compability, int power)
-        :base(compability, label)
+        protected BaseEngine(string label, int power)
+        :base(label)
         {
             PowerEngine = power;
         }

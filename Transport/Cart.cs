@@ -25,7 +25,7 @@ namespace test_project
         {
             if (newWheels.Count == 4)
                 if (newWheels.TrueForAll(engine => engine.Label == newWheels[0].Label))
-                    if (newWheels.TrueForAll(engine => engine.CompabilityFlag == DetailCompability.Bike))
+                    if (newWheels.TrueForAll(engine => engine is BikeWheel))
                         return CheckDetailValidResult.Need;
 
             return CheckDetailValidResult.WrongDetail;

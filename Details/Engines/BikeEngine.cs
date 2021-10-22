@@ -23,7 +23,7 @@
         }
 
         public BikeEngine(string label)
-        :base(label, DetailCompability.Bike, 10)
+        :base(label, 10)
         {
             IsForced = false;
         }

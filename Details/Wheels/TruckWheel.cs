@@ -3,7 +3,7 @@
     class TruckWheel : BaseWheel
     {
         public TruckWheel(string label)
-        :base(label, DetailCompability.Truck, 8)
+        :base(label, 8)
         {
         }
         public void priming()

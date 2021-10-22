@@ -4,7 +4,7 @@ namespace test_project
     class TruckSteeringWheel: BaseSteeringWheel, IBeep
     {
         public TruckSteeringWheel(string label)
-        :base(label, DetailCompability.Truck)
+        :base(label)
         {
         }
         public void beep()
