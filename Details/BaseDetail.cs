@@ -1,5 +1,14 @@
-﻿namespace test_project
+﻿using System;
+
+namespace test_project
 {
+    public enum DetailCompability
+    {
+        Car,
+        Truck,
+        Bike
+    };
+
     class BaseDetail
     {
         public DetailCompability CompabilityFlag { get; }//совместимость

@@ -1,110 +1,45 @@
 ﻿using System;
+using System.Collections;
 
 
 namespace test_project
 {
-    public enum DetailCompability
-    {
-        Car = 0,
-        Truck = 1,
-        Bike = 2
-    };
-    public enum DetailType
-    {
-        Wheel,
-        Engine,
-        SteeringWheel
-    }
-    
     class Warehouse
     {
-        static public BaseDetail CreateDetail(string label, DetailCompability compability, DetailType type)
+        public IEnumerable GetNextDetail(string label)
         {
-            switch (type)
+            while(true)
             {
-                case DetailType.Wheel:
-                    {
-                        return CreateWheel(label, compability);
-                    }
-                case DetailType.Engine:
-                    {
-                        return CreateEngine(label, compability);
-                    }
-                case DetailType.SteeringWheel:
-                    {
-                        return CreateSteeringWheel(label, compability);
-                    }
-                default:
-                    {
-                        return null;
-                    }
+                yield return GetNextWheel(label);
+                yield return GetNextEngine(label);
+                yield return GetNextSteeringWheel(label);
             }
         }
-
-        static public BaseWheel CreateWheel(string label, DetailCompability compability)
+        public IEnumerable GetNextWheel(string label)
         {
-            switch (compability)
+            while (true)
             {
-                case DetailCompability.Bike:
-                    {
-                        return new BikeWheel(label);
-                    }
-                case DetailCompability.Car:
-                    {
-                        return new CarWheel(label);
-                    }
-                case DetailCompability.Truck:
-                    {
-                        return new TruckWheel(label);
-                    }
-                default:
-                    {
-                        return null;
-                    }
+                yield return new CarWheel(label);
+                yield return new BikeWheel(label);
+                yield return new TruckWheel(label);
             }
         }
-        static public BaseEngine CreateEngine(string label, DetailCompability compability)
+        public IEnumerable GetNextEngine(string label)
         {
-            switch (compability)
+            while (true)
             {
-                case DetailCompability.Bike:
-                    {
-                        return new BikeEngine(label);
-                    }
-                case DetailCompability.Car:
-                    {
-                        return new CarEngine(label);
-                    }
-                case DetailCompability.Truck:
-                    {
-                        return new TruckEngine(label);
-                    }
-                default:
-                    {
-                        return null;
-                    }
+                yield return new CarEngine(label);
+                yield return new BikeEngine(label);
+                yield return new TruckEngine(label);
             }
         }
-        static public BaseSteeringWheel CreateSteeringWheel(string label, DetailCompability compability)
+        public IEnumerable GetNextSteeringWheel(string label)
         {
-            switch (compability)
+            while (true)
             {
-                case DetailCompability.Bike:
-                    {
-                        return new BikeSteeringWheel(label);
-                    }
-                case DetailCompability.Car:
-                    {
-                        return new CarSteeringWheel(label);
-                    }
-                case DetailCompability.Truck:
-                    {
-                        return new TruckSteeringWheel(label);
-                    }
-                default:
-                    {
-                        return null;
-                    }
+                yield return new CarSteeringWheel(label);
+                yield return new BikeSteeringWheel(label);
+                yield return new TruckSteeringWheel(label);
             }
         }
     }

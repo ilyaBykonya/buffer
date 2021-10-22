@@ -13,55 +13,50 @@ namespace test_project
         public override void RepairTransport(BaseTransport transport)
         {
             Warehouse warehouse = new Warehouse();
-            RepareSteeringWheel(transport, warehouse);
-            RepareEngines(transport, warehouse);
-            RepareWheels(transport, warehouse);
+            RepareSteeringWheel(warehouse, transport);
+            RepareEngines(warehouse, transport);
+            RepareWheels(warehouse, transport);
         }
 
-        private void RepareSteeringWheel(BaseTransport transport, Warehouse warehouse)
+        private void RepareSteeringWheel(Warehouse warehouse, BaseTransport transport)
         {
             if (transport.GetSteeringWheel() == null)
                 return;
 
-            foreach (DetailType detailType in System.Enum.GetValues(typeof(DetailType)))
+            foreach(var detail in warehouse.GetNextDetail(_service))
+                if (transport.TryResetSteeringWheel((BaseSteeringWheel)detail))
+                    return;
+        }
+        private void RepareEngines(Warehouse warehouse, BaseTransport transport)
+        {
+            int requiredEngines = (transport.GetEnginesList() != null) ? transport.GetEnginesList().Count : 0;
+            if (requiredEngines == 0)
+                return;
+
+            foreach (var detail in warehouse.GetNextDetail(_service))
             {
-                foreach (DetailCompability type in System.Enum.GetValues(typeof(DetailCompability)))
-                {
-                    if (transport.TryResetSteeringWheel((BaseSteeringWheel)Warehouse.CreateDetail(_service, type, detailType)))
-                        return;
-                }
+                List<BaseEngine> newEnginesList = new List<BaseEngine>();
+                for (int i = 0; i < requiredEngines; ++i)
+                    newEnginesList.Add((BaseEngine)detail);
+
+                if (transport.TryResetEnginesList(newEnginesList))
+                    return;
             }
         }
-        private void RepareEngines(BaseTransport transport, Warehouse warehouse)
+        private void RepareWheels(Warehouse warehouse, BaseTransport transport)
         {
-            int requiredEngines = transport.GetEnginesList().Count;
-            foreach (DetailType detailType in System.Enum.GetValues(typeof(DetailType)))
-            {
-                foreach (DetailCompability type in System.Enum.GetValues(typeof(DetailCompability)))
-                {
-                    List<BaseEngine> newEnginesList = new List<BaseEngine>();
-                    for (int i = 0; i < requiredEngines; ++i)
-                        newEnginesList.Add((BaseEngine)Warehouse.CreateDetail(_service, type, detailType));
+            int requiredWheels = (transport.GetWheelsList() != null) ? transport.GetWheelsList().Count : 0;
+            if (requiredWheels == 0)
+                return;
 
-                    if (transport.TryResetEnginesList(newEnginesList))
-                        return;
-                }
-            }
-        }
-        private void RepareWheels(BaseTransport transport, Warehouse warehouse)
-        {
-            int requiredWheels = transport.GetWheelsList().Count;
-            foreach (DetailType detailType in System.Enum.GetValues(typeof(DetailType)))
+            foreach (var detail in warehouse.GetNextDetail(_service))
             {
-                foreach (DetailCompability type in System.Enum.GetValues(typeof(DetailCompability)))
-                {
-                    List<BaseWheel> newWheelsList = new List<BaseWheel>();
-                    for (int i = 0; i < requiredWheels; ++i)
-                        newWheelsList.Add((BaseWheel)(Warehouse.CreateDetail(_service, type, detailType)));
+                List<BaseWheel> newWheelsList = new List<BaseWheel>();
+                for (int i = 0; i < requiredWheels; ++i)
+                    newWheelsList.Add((BaseWheel)detail);
 
-                    if (transport.TryResetWheelsList(newWheelsList))
-                        return;
-                }
+                if (transport.TryResetWheelsList(newWheelsList))
+                    return;
             }
         }
     }

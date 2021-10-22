@@ -63,6 +63,8 @@ namespace test_project
         {
             if (newEngines == null)
                 return false;
+            if (!newEngines.TrueForAll(e => e != null))
+                return false;
 
             switch (CheckIsValidEnginesList(newEngines))
             {
@@ -88,6 +90,8 @@ namespace test_project
         public bool TryResetWheelsList(List<BaseWheel> newWheels)
         {
             if (newWheels == null)
+                return false;
+            if (!newWheels.TrueForAll(e => e != null))
                 return false;
 
             switch (CheckIsValidWheelsList(newWheels))
