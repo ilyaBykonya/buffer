@@ -6,26 +6,36 @@ namespace BaseTypesSerializator
 {
     static class BaseTypesSerializator
     {
-        public static int SerializeType(object value, byte[] data, int offset)
+        public static byte[] SerializeType(object value)
         {
-            uint valueSize = GetTypeSize(value);
-            var writer = new BinaryWriter(new MemoryStream(data, offset, data.Length - offset, true));
+            uint valueSize = GetTypeSize(value) + 4;
+            byte[] data = new byte[valueSize + 1];
+            var writer = new BinaryWriter(new MemoryStream(data, true), System.Text.Encoding.UTF8);
+
 
             writer.Write(BeginMessageCode);
-            writer.Write(5 + valueSize);
+            //BinaryWriter пишет от BigEndian. Так что приходится его разбивать.
+            writer.Write((byte)(valueSize >> 24));
+            writer.Write((byte)(valueSize >> 16));
+            writer.Write((byte)(valueSize >> 8));
+            writer.Write((byte)(valueSize >> 0));
             SerializeValue(writer, value);
-            return (int)(valueSize + 6);
+            return data;
         }
-        public static int DeserializeType(out object result, byte[] data, int offset)
+        public static object DeserializeType(byte[] data)
         {
-            result = null;
-            var reader = new BinaryReader(new MemoryStream(data, offset, data.Length - offset, false));
+            object result = null;
+            var reader = new BinaryReader(new MemoryStream(data, false), System.Text.Encoding.UTF8);
             if (reader.ReadByte() != BeginMessageCode)
                 throw new InvalidDataContractException($"Invalid begin message code");
 
-            reader.ReadUInt32();
+            //Да. Такая страшная запись позволяет восстановить байт. Можно не париться. Это работает.
+            uint writtenSize = ((uint)reader.ReadByte() << 24) | ((uint)reader.ReadByte() << 16) | ((uint)reader.ReadByte() << 8) | ((uint)reader.ReadByte());
+            if (data.Length != writtenSize + 1)
+                throw new OutOfMemoryException($"Invalid data block size. Expected {writtenSize}, but was {data.Length}");
+            
             result = DeserializeValue(reader);
-            return (int)(GetTypeSize(result) + 6);
+            return result;
         }
 
 
@@ -52,10 +62,36 @@ namespace BaseTypesSerializator
             else if (value is byte[]) SerializeValue(writer, (byte[])value);
             else throw new InvalidCastException();
         }
-        private static void SerializeValue(BinaryWriter writer, int value) => writer.Write(value);
-        private static void SerializeValue(BinaryWriter writer, uint value) => writer.Write(value);
+        private static void SerializeValue(BinaryWriter writer, int value)
+        {
+            //И даже тут обратная запись подкинула ложку дёгтя.
+            //Делаем всё тоже самое, что и с размером
+            writer.Write((byte)(value >> 24));
+            writer.Write((byte)(value >> 16));
+            writer.Write((byte)(value >> 8));
+            writer.Write((byte)(value >> 0));
+        }
+        private static void SerializeValue(BinaryWriter writer, uint value)
+        {
+            //И даже тут обратная запись подкинула ложку дёгтя.
+            //Делаем всё тоже самое, что и с размером
+            writer.Write((byte)(value >> 24));
+            writer.Write((byte)(value >> 16));
+            writer.Write((byte)(value >> 8));
+            writer.Write((byte)(value >> 0));
+        }
         private static void SerializeValue(BinaryWriter writer, bool value) => writer.Write(value);
-        private static void SerializeValue(BinaryWriter writer, string value) => writer.Write(value);
+        private static void SerializeValue(BinaryWriter writer, string value)
+        {
+            //C# десериализует строки следующим образом.
+            //Выше я установил формат UTF-8, поэтому он
+            //обрезает двухбайтовые символы до однобайтовых.
+            //C# пишет кол-во символов в поток, потом сами символы. Он не ставит \0
+            //Поэтому делаем сие дело руками:
+            foreach (char symbol in value)
+                writer.Write(symbol);
+            writer.Write('\0');
+        }
         private static void SerializeValue(BinaryWriter writer, byte[] value)
         {
             writer.Write((byte)value.Length);
@@ -81,10 +117,24 @@ namespace BaseTypesSerializator
                 _ => throw new InvalidCastException()
             };
         }
-        private static int DeserializeValue(BinaryReader reader, int _) => reader.ReadInt32();
-        private static uint DeserializeValue(BinaryReader reader, uint _) => reader.ReadUInt32();
+        private static int DeserializeValue(BinaryReader reader, int _)
+        {
+            return ((int)reader.ReadByte() << 24) | ((int)reader.ReadByte() << 16) | ((int)reader.ReadByte() << 8) | ((int)reader.ReadByte());
+        }
+        private static uint DeserializeValue(BinaryReader reader, uint _)
+        {
+            return ((uint)reader.ReadByte() << 24) | ((uint)reader.ReadByte() << 16) | ((uint)reader.ReadByte() << 8) | ((uint)reader.ReadByte());
+        }
         private static bool DeserializeValue(BinaryReader reader, bool _) => reader.ReadBoolean();
-        private static string DeserializeValue(BinaryReader reader, string _) => reader.ReadString();
+        private static string DeserializeValue(BinaryReader reader, string _)
+        {
+            //Ну и т.к. мы офигенно записали руками всё, что там было, придётся
+            //точно также, руками, читать всё обратно
+            string result = String.Empty;
+            for (char symbol = reader.ReadChar(); symbol != '\0'; symbol = reader.ReadChar())
+                result += symbol;
+            return result;
+        }
         private static byte[] DeserializeValue(BinaryReader reader, byte[] _) => reader.ReadBytes(reader.ReadByte());
         private static object[] DeserializeValue(BinaryReader reader, object[] _)
         {
@@ -122,14 +172,14 @@ namespace BaseTypesSerializator
             else if (value is byte[]) return GetTypeSize((byte[])value);
             else throw new InvalidCastException();
         }
-        private static uint GetTypeSize(int _) => 4;
-        private static uint GetTypeSize(uint _) => 4;
-        private static uint GetTypeSize(bool _) => 1;
-        private static uint GetTypeSize(string value) => (uint)((value.Length + 1) * 2);
-        private static uint GetTypeSize(byte[] value) => (uint)value.Length;
+        private static uint GetTypeSize(int _) => 5;
+        private static uint GetTypeSize(uint _) => 5;
+        private static uint GetTypeSize(bool _) => 2;
+        private static uint GetTypeSize(string value) => (uint)(value.Length + 2);
+        private static uint GetTypeSize(byte[] value) => (uint)value.Length + 2;
         private static uint GetTypeSize(object[] value)
         {
-            uint resultSize = 0;
+            uint resultSize = 2;
             foreach (var obj in value)
                 resultSize += GetTypeSize(obj);
 
