@@ -173,6 +173,7 @@ namespace BinarySerializableTypes
         }
         public override void SerializeValue(BinaryWriter writer)
         {
+            writer.Write((byte)Value.Length);
             writer.Write(Value);
         }
         public override void DeserializeValue(BinaryReader reader)

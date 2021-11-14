@@ -3,7 +3,7 @@ using System;
 using BinarySerializableTypes;
 using System.Collections.Generic;
 
-namespace yield
+namespace Programm
 {
 	public static class Program
 	{
