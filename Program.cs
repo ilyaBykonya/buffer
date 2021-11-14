@@ -1,5 +1,6 @@
 ﻿// Вставьте сюда финальное содержимое файла MovingAverageTask.cs
 using System;
+using BaseTypesSerializator;
 using BinarySerializableTypes;
 using System.Collections.Generic;
 
@@ -7,66 +8,60 @@ namespace Programm
 {
 	public static class Program
 	{
-        static void PrintInt(TypeInt value)
-        {
-            Console.WriteLine(value.Value);
-            value.Value = 10;
-            Console.WriteLine(value.Value);
-        }
+
         static void test_1()
         {
             Console.WriteLine("===================================");
-            TypeInt x = new TypeInt(15);
-            Console.WriteLine(x.Value);
+            int l = 14;
+            Console.WriteLine(l);
 
             byte[] buffer = new byte[1000];
-            int offset = x.SerializeType(buffer, 0);
-            for(int i = 0; i < offset; ++i)
+            int newOffset = BaseTypesSerializator.BaseTypesSerializator.SerializeType(l, buffer, 0);
+            for(int i = 0; i < newOffset; ++i)
                 Console.Write($"{buffer[i]:X} ");
             Console.WriteLine();
 
-            x.DeserializeType(buffer, 0);
-            Console.WriteLine(x.Value);
+            BaseTypesSerializator.BaseTypesSerializator.DeserializeType(out object k, buffer, 0);
+            Console.WriteLine(k);
             Console.WriteLine("===================================");
         }
         static void test_2()
         {
             Console.WriteLine("===================================");
-            TypeString x = new TypeString("Hello, world");
-            Console.WriteLine(x.Value);
+            string l = "Hello, world";
+            Console.WriteLine(l);
 
             byte[] buffer = new byte[1000];
-            int offset = x.SerializeType(buffer, 0);
-            for (int i = 0; i < offset; ++i)
+            int newOffset = BaseTypesSerializator.BaseTypesSerializator.SerializeType(l, buffer, 0);
+            for (int i = 0; i < newOffset; ++i)
                 Console.Write($"{buffer[i]:X} ");
             Console.WriteLine();
 
-            x.DeserializeType(buffer, 0);
-            Console.WriteLine(x.Value);
+            BaseTypesSerializator.BaseTypesSerializator.DeserializeType(out object k, buffer, 0);
+            Console.WriteLine(k);
             Console.WriteLine("===================================");
         }
         static void test_3()
         {
             Console.WriteLine("===================================");
-            TypeArray x = new TypeArray(new BaseType[]{ new TypeInt(42), new TypeBool(true), new TypeString("FooBar") });
-
-            Console.WriteLine(((TypeInt)x.Value[0]).Value);
-            Console.WriteLine(((TypeBool)x.Value[1]).Value);
-            Console.WriteLine(((TypeString)x.Value[2]).Value);
+            object[] l = new object[3] { 42, true, "FooBar" };
+            for (int i = 0; i < 3; ++i)
+                Console.Write($"{l[i]:X} ");
+            Console.WriteLine();
 
             byte[] buffer = new byte[1000];
-            int offset = x.SerializeType(buffer, 0);
-            for (int i = 0; i < offset; ++i)
+            int newOffset = BaseTypesSerializator.BaseTypesSerializator.SerializeType(l, buffer, 0);
+            for (int i = 0; i < newOffset; ++i)
                 Console.Write($"{buffer[i]:X} ");
             Console.WriteLine();
 
-            x.DeserializeType(buffer, 0);
-
-            Console.WriteLine(((TypeInt)x.Value[0]).Value);
-            Console.WriteLine(((TypeBool)x.Value[1]).Value);
-            Console.WriteLine(((TypeString)x.Value[2]).Value);
+            BaseTypesSerializator.BaseTypesSerializator.DeserializeType(out object k, buffer, 0);
+            for (int i = 0; i < 3; ++i)
+                Console.Write($"{l[i]:X} ");
+            Console.WriteLine();
             Console.WriteLine("===================================");
         }
+
 
         static void Main(string[] args)
         {
