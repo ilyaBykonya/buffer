@@ -1,115 +1,101 @@
 ﻿// Вставьте сюда финальное содержимое файла MovingAverageTask.cs
 using System;
-using BaseTypesSerializator;
+using System.Globalization;
 using System.Collections.Generic;
 
-namespace Programm
+namespace Program
 {
-	public static class Program
-	{
-
-        static void test_1()
+    public static class Application
+    {
+        private static Goods CreateGoods()
         {
-            Console.WriteLine("===================================");
-            int l = 269488144;
-            Console.WriteLine(l);
+            Random randGenerator = new Random();
+            string title = string.Empty;
+            string type = string.Empty;
+            Prices prices = new Prices();
 
-            byte[] buffer = BaseTypesSerializator.BaseTypesSerializator.SerializeType(l);
-            for(int i = 0; i < buffer.Length; ++i)
-                Console.Write($"{buffer[i]:X} ");
-            Console.WriteLine();
+            for (int i = 0; i < randGenerator.Next() % 15 + 5; ++i)
+                title += (char)(randGenerator.Next() % 30 + 60);
 
-            object k = BaseTypesSerializator.BaseTypesSerializator.DeserializeType(buffer);
-            Console.WriteLine(k);
-            Console.WriteLine("===================================");
+            for (int i = 0; i < randGenerator.Next() % 15 + 5; ++i)
+                type += (char)(randGenerator.Next() % 30 + 60);
+
+            decimal startPrice = randGenerator.Next() % 1000;//Чтобы дикого разброса не было
+            prices.Values[PriceCathegory.RetailPrice][ClientCathegory.SimpleClient] = startPrice;
+            prices.Values[PriceCathegory.RetailPrice][ClientCathegory.CorporateClient] = startPrice - (startPrice * 0.02M);
+            prices.Values[PriceCathegory.WholesalePrice][ClientCathegory.SimpleClient] = startPrice - (startPrice * 0.07M);
+            prices.Values[PriceCathegory.WholesalePrice][ClientCathegory.CorporateClient] = startPrice - (startPrice * 0.05M);
+
+            return new Goods(title, type, (GoodsCathegory)(randGenerator.Next() % 3), (decimal)(randGenerator.NextDouble() / 4), prices);
         }
-        static void test_2()
+        private static GoodsRack CreateRack()
         {
-            Console.WriteLine("===================================");
-            bool l = true;
-            Console.WriteLine(l);
+            Random randGenerator = new Random();
+            GoodsRack result = new GoodsRack();
+            for (int i = 0; i < randGenerator.Next() % 6 + 5; ++i)
+                result.GoodsOnRack.AddLast(CreateGoods());
 
-            byte[] buffer = BaseTypesSerializator.BaseTypesSerializator.SerializeType(l);
-            for (int i = 0; i < buffer.Length; ++i)
-                Console.Write($"{buffer[i]:X} ");
-            Console.WriteLine();
-
-            object k = BaseTypesSerializator.BaseTypesSerializator.DeserializeType(buffer);
-            Console.WriteLine(k);
-            Console.WriteLine("===================================");
+            return result;
         }
-        static void test_3()
+        private static Shop CreateShop()
         {
-            Console.WriteLine("===================================");
-            byte[] l = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            for(int i = 0; i < l.Length; ++i)
-                Console.Write($"{l[i]} ");
-            Console.WriteLine();
+            Random randGenerator = new Random();
+            string title = string.Empty;
+            for (int i = 0; i < randGenerator.Next() % 15 + 5; ++i)
+                title += (char)(randGenerator.Next() % 30 + 60);
 
-            byte[] buffer = BaseTypesSerializator.BaseTypesSerializator.SerializeType(l);
-            for (int i = 0; i < buffer.Length; ++i)
-                Console.Write($"{buffer[i]:X} ");
-            Console.WriteLine();
+            Shop result = new Shop(title, (LoyalityStatus)(randGenerator.Next() % 3));
+            for (int i = 0; i < randGenerator.Next() % 6 + 5; ++i)
+                result.Racks.AddLast(CreateRack());
 
-            byte[] k = (byte[])BaseTypesSerializator.BaseTypesSerializator.DeserializeType(buffer);
-            for (int i = 0; i < l.Length; ++i)
-                Console.Write($"{k[i]} ");
-            Console.WriteLine();
-            Console.WriteLine("===================================");
+            return result;
         }
-        static void test_4()
-        {
-            Console.WriteLine("===================================");
-            string l = "abcde";
-            Console.WriteLine(l);
 
-            byte[] buffer = BaseTypesSerializator.BaseTypesSerializator.SerializeType(l);
-            for (int i = 0; i < buffer.Length; ++i)
-                Console.Write($"{buffer[i]:X} ");
-            Console.WriteLine();
-
-            object k = BaseTypesSerializator.BaseTypesSerializator.DeserializeType(buffer);
-            Console.WriteLine(k);
-            Console.WriteLine("===================================");
-        }
-        static void test_5()
-        {
-            Console.WriteLine("===================================");
-            object[] arr = {
-                new object[] {
-                    1, 2, 3
-                },
-                "abstd",
-                true
-            };
-            Console.WriteLine(((object[])arr[0])[0]);
-            Console.WriteLine(((object[])arr[0])[1]);
-            Console.WriteLine(((object[])arr[0])[2]);
-            Console.WriteLine(arr[1]);
-            Console.WriteLine(arr[2]);
-
-            byte[] buffer = BaseTypesSerializator.BaseTypesSerializator.SerializeType(arr);
-            for (int i = 0; i < buffer.Length; ++i)
-                Console.Write($"{buffer[i]:X} ");
-            Console.WriteLine();
-
-            object[] second_arr = (object[])BaseTypesSerializator.BaseTypesSerializator.DeserializeType(buffer);
-
-            Console.WriteLine(((object[])second_arr[0])[0]);
-            Console.WriteLine(((object[])second_arr[0])[1]);
-            Console.WriteLine(((object[])second_arr[0])[2]);
-            Console.WriteLine(second_arr[1]);
-            Console.WriteLine(second_arr[2]);
-            Console.WriteLine("===================================");
-        }
 
         static void Main(string[] args)
         {
-            test_1();
-            test_2();
-            test_3();
-            test_4();
-            test_5();
+            var shop = CreateShop();
+            //Test_1(shop);
+            //Test_2(shop);
+            //Test_3(shop);
         }
-	}
+
+        //Вывод, как требовалось в задании
+        private static void Test_1(Shop shop)
+        {
+            shop.Print();
+        }
+
+        //Получает все цены на все товары для всех типов потребителей
+        //и для всевозможных объёмов закупок. Короче, получает всё, что можно.
+        //Как пример, можно посчитать среднюю цену по
+        //товарам на весь магазин на всех покупателей.
+        private static void Test_2(Shop shop)
+        {
+            uint countOfPrices = 0;
+            decimal pricesSum = 0.0M;
+            foreach (var elem in shop.GetResultPricesForAllGoods())
+            {
+                countOfPrices += 8;
+                pricesSum += elem.Item3.RetailPrices[ClientCathegory.SimpleClient];
+                pricesSum += elem.Item3.RetailPrices[ClientCathegory.CorporateClient];
+                pricesSum += elem.Item3.WholesalePrices[WholesaleSize.First][ClientCathegory.SimpleClient];
+                pricesSum += elem.Item3.WholesalePrices[WholesaleSize.First][ClientCathegory.CorporateClient];
+                pricesSum += elem.Item3.WholesalePrices[WholesaleSize.Second][ClientCathegory.SimpleClient];
+                pricesSum += elem.Item3.WholesalePrices[WholesaleSize.Second][ClientCathegory.CorporateClient];
+                pricesSum += elem.Item3.WholesalePrices[WholesaleSize.Third][ClientCathegory.SimpleClient];
+                pricesSum += elem.Item3.WholesalePrices[WholesaleSize.Third][ClientCathegory.CorporateClient];
+            }
+            Console.WriteLine($"Average frice for shop: { pricesSum / countOfPrices }");
+        }
+
+        //Вычисление оптовой цены на все товары для простых клинетов
+        private static void Test_3(Shop shop)
+        {
+            Console.WriteLine("Title\tCathegory\tPrice");
+            foreach (var elem in shop.GetAllGoodsPrices(ClientCathegory.SimpleClient, 1000))
+                Console.WriteLine($"{elem.Item1} | {elem.Item2} | {elem.Item3}");
+        }
+
+    }
 }
